@@ -1,0 +1,74 @@
+---
+// src/pages/index.astro
+// Main page – imports the interactive Vue TodoList component
+import TodoList from '../components/TodoList.vue';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Todo App</title>
+    <style>
+      /* ---- Global reset & base ---- */
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+        background: #f0f2f5;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 1rem;
+        color: #1a1a2e;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      header h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #4f46e5;
+        letter-spacing: -0.5px;
+      }
+
+      header p {
+        color: #6b7280;
+        margin-top: 0.4rem;
+        font-size: 0.95rem;
+      }
+
+      main {
+        width: 100%;
+        max-width: 600px;
+      }
+
+      footer {
+        margin-top: 3rem;
+        color: #9ca3af;
+        font-size: 0.8rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>✅ Simple Todo</h1>
+      <p>Built with Astro + Vue 3</p>
+    </header>
+
+    <main>
+      <!-- client:load ensures Vue hydrates immediately on page load -->
+      <TodoList client:load />
+    </main>
+
+    <footer>
+      <p>Phase 1 – UI only · No database yet</p>
+    </footer>
+  </body>
+</html>
