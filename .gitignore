@@ -1,0 +1,22 @@
+# Build output
+dist/
+.output/
+
+# Dependencies
+node_modules/
+
+# Astro dev cache
+.astro/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
