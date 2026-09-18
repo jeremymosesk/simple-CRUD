@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // TodoList.vue
 // Main interactive component – manages all todo state and CRUD operations.
-// Uses Vue 3 Composition API with TypeScript.
+// Phase 2: data is persisted in Neon PostgreSQL via Astro API routes.
 
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import TodoForm from './TodoForm.vue';
 
 // ---- Types ----
@@ -14,45 +14,78 @@ interface Todo {
 }
 
 // ---- State ----
-let nextId = 6;
-
-// Hardcoded mock data (Phase 1 – no database yet)
-const todos = ref<Todo[]>([
-  { id: 1, title: 'Set up Astro + Vue project', completed: true },
-  { id: 2, title: 'Build TodoList component',   completed: true },
-  { id: 3, title: 'Style the UI',               completed: false },
-  { id: 4, title: 'Deploy to Vercel',            completed: false },
-  { id: 5, title: 'Connect Neon PostgreSQL (Phase 2)', completed: false },
-]);
+const todos = ref<Todo[]>([]);
+const loading = ref(true);
+const error = ref('');
 
 // ---- Computed helpers ----
 const remaining = () => todos.value.filter(t => !t.completed).length;
 
+// ---- Fetch all todos on mount ----
+onMounted(async () => {
+  try {
+    const res = await fetch('/api/todos');
+    if (!res.ok) throw new Error('Failed to load');
+    todos.value = await res.json();
+  } catch (e) {
+    error.value = 'Could not load todos. Check your DATABASE_URL.';
+  } finally {
+    loading.value = false;
+  }
+});
+
 // ---- CRUD operations ----
 
-/** Add a new todo from the form */
-function addTodo(title: string) {
-  todos.value.push({ id: nextId++, title, completed: false });
+/** Add a new todo */
+async function addTodo(title: string) {
+  const res = await fetch('/api/todos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title }),
+  });
+  if (res.ok) {
+    const todo: Todo = await res.json();
+    todos.value.push(todo);
+  }
 }
 
 /** Delete a todo by id */
-function deleteTodo(id: number) {
-  todos.value = todos.value.filter(t => t.id !== id);
+async function deleteTodo(id: number) {
+  const res = await fetch(`/api/todos/${id}`, { method: 'DELETE' });
+  if (res.ok) {
+    todos.value = todos.value.filter(t => t.id !== id);
+  }
 }
 
 /** Toggle completed state */
-function toggleTodo(id: number) {
+async function toggleTodo(id: number) {
   const todo = todos.value.find(t => t.id === id);
-  if (todo) todo.completed = !todo.completed;
+  if (!todo) return;
+  const res = await fetch(`/api/todos/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ completed: !todo.completed }),
+  });
+  if (res.ok) {
+    const updated: Todo = await res.json();
+    todo.completed = updated.completed;
+  }
 }
 
 /** Inline edit – prompt the user for a new title */
-function editTodo(id: number) {
+async function editTodo(id: number) {
   const todo = todos.value.find(t => t.id === id);
   if (!todo) return;
   const newTitle = window.prompt('Edit todo:', todo.title);
-  if (newTitle !== null && newTitle.trim()) {
-    todo.title = newTitle.trim();
+  if (!newTitle || !newTitle.trim()) return;
+  const res = await fetch(`/api/todos/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: newTitle.trim() }),
+  });
+  if (res.ok) {
+    const updated: Todo = await res.json();
+    todo.title = updated.title;
   }
 }
 </script>
@@ -67,8 +100,14 @@ function editTodo(id: number) {
     <!-- Add-todo form -->
     <TodoForm @add="addTodo" />
 
+    <!-- Loading state -->
+    <p v-if="loading" class="empty-msg">⏳ Loading...</p>
+
+    <!-- Error state -->
+    <p v-else-if="error" class="error-msg">⚠️ {{ error }}</p>
+
     <!-- Empty state -->
-    <p v-if="todos.length === 0" class="empty-msg">
+    <p v-else-if="todos.length === 0" class="empty-msg">
       🎉 Nothing left to do!
     </p>
 
@@ -145,6 +184,14 @@ function editTodo(id: number) {
 .empty-msg {
   text-align: center;
   color: #9ca3af;
+  padding: 1.5rem 0;
+  font-size: 1.05rem;
+}
+
+/* ---- Error state ---- */
+.error-msg {
+  text-align: center;
+  color: #ef4444;
   padding: 1.5rem 0;
   font-size: 1.05rem;
 }
