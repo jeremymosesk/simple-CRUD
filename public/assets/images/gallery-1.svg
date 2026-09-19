@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="Placeholder wedding image 1">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3e2416" />
+      <stop offset="100%" stop-color="#b98854" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#g1)" />
+  <circle cx="360" cy="420" r="160" fill="#f2dbc0" opacity="0.24" />
+  <text x="50%" y="50%" fill="#f7e9d4" font-size="54" text-anchor="middle" font-family="Georgia, serif">Jeremy &amp; Sylvania</text>
+  <text x="50%" y="58%" fill="#eed4b5" font-size="34" text-anchor="middle" font-family="Georgia, serif">Placeholder Photo 01</text>
+</svg>
